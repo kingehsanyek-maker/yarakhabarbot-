@@ -3,3 +3,4 @@ python-telegram-bot==20.3
 requests
 feedparser
 flask
+python-dotenv
