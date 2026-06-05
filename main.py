@@ -8,7 +8,7 @@ import os
 from dotenv import load_dotenv
 
 # =========================
-# تنظیمات
+# بارگذاری متغیرهای محیطی
 # =========================
 load_dotenv()
 
@@ -16,6 +16,9 @@ API_ID = int(os.getenv("API_ID"))
 API_HASH = os.getenv("API_HASH")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
+# =========================
+# تنظیمات
+# =========================
 SOURCE_CHANNELS = [
     "KhabarFori",
     "KhabarFooury",
@@ -177,3 +180,10 @@ def run_web():
 # اجرا
 # =========================
 if __name__ == "__main__":
+    threading.Thread(
+        target=run_web,
+        daemon=True
+    ).start()
+
+    print("🚀 YaraKhabar Started")
+    client.run_until_disconnected()
