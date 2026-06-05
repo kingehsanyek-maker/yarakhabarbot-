@@ -1,14 +1,3 @@
-import os
-from dotenv import load_dotenv
-from telethon import TelegramClient
-
-load_dotenv()
-
-api_id = int(os.getenv("API_ID"))
-api_hash = os.getenv("API_HASH")
-bot_token = os.getenv("BOT_TOKEN")
-
-client = TelegramClient('session', api_id, api_hash).start(bot_token=bot_token)
 from telethon import TelegramClient, events
 from flask import Flask
 from collections import deque
@@ -16,12 +5,16 @@ import threading
 import hashlib
 import re
 import os
+from dotenv import load_dotenv
 
 # =========================
 # تنظیمات
 # =========================
-API_ID = 17349
-API_HASH = "344583e45741c457fe1862106095a5eb"
+load_dotenv()
+
+API_ID = int(os.getenv("API_ID"))
+API_HASH = os.getenv("API_HASH")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 SOURCE_CHANNELS = [
     "KhabarFori",
@@ -109,7 +102,7 @@ client = TelegramClient(
     "yarakhabar_session",
     API_ID,
     API_HASH
-)
+).start(bot_token=BOT_TOKEN)
 
 @client.on(events.NewMessage(chats=SOURCE_CHANNELS))
 async def handler(event):
@@ -184,11 +177,3 @@ def run_web():
 # اجرا
 # =========================
 if __name__ == "__main__":
-    threading.Thread(
-        target=run_web,
-        daemon=True
-    ).start()
-
-    print("🚀 YaraKhabar Started")
-    with client:
-        client.run_until_disconnected()
