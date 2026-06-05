@@ -1,3 +1,14 @@
+import os
+from dotenv import load_dotenv
+from telethon import TelegramClient
+
+load_dotenv()
+
+api_id = int(os.getenv("API_ID"))
+api_hash = os.getenv("API_HASH")
+bot_token = os.getenv("BOT_TOKEN")
+
+client = TelegramClient('session', api_id, api_hash).start(bot_token=bot_token)
 from telethon import TelegramClient, events
 from flask import Flask
 from collections import deque
