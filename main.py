@@ -7,20 +7,11 @@ import re
 import os
 import logging
 
-# =========================
-# تنظیمات
-# =========================
 API_ID = 31166081
 API_HASH = "5a19b28b0417beeb45b23cbf77586257"
 
-SOURCE_CHANNELS = [
-    "KhabarFori",
-    "KhabarFooury",
-    "akharinkhabar"
-]
-
+SOURCE_CHANNELS = ["KhabarFori", "KhabarFooury", "akharinkhabar"]
 DEST_CHANNEL = -1002471046678
-
 MY_SIGNATURE = "\n\n@YARAKHABAR📢\n🔷🔹🎯هر لحظه یک خبر تازه🎯🔹🔷"
 
 BLOCKED_WORDS = [
@@ -80,9 +71,6 @@ def is_duplicate(text):
 def add_history(text):
     recent_hashes.append(get_hash(text))
 
-# =========================
-# User Client
-# =========================
 client = TelegramClient("yarakhabar_user", API_ID, API_HASH)
 
 @client.on(events.NewMessage(chats=SOURCE_CHANNELS))
@@ -90,18 +78,12 @@ async def handler(event):
     try:
         msg = event.message
         text = msg.message or ""
-
         cleaned = clean(text)
 
-        if is_rubbish(cleaned):
-            return
-        if contains_blocked(cleaned):
-            return
-        if is_duplicate(cleaned):
+        if is_rubbish(cleaned) or contains_blocked(cleaned) or is_duplicate(cleaned):
             return
 
         add_history(cleaned)
-
         header = "🚨🌟♦️🚨"
         final_text = f"{header}\n{cleaned}\n{header}{MY_SIGNATURE}"
 
@@ -112,4 +94,22 @@ async def handler(event):
 
         print("✅ ارسال شد")
 
-    except Exception
+    except Exception as e:
+        print("❌ خطا:", e)
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "YaraKhabar User Client Running"
+
+def run_web():
+    port = int(os.environ.get("PORT", 5000))
+    threading.Thread(target=lambda: app.run(host="0.0.0.0", port=port), daemon=True).start()
+
+if __name__ == "__main__":
+    print("🚀 Starting YaraKhabarBot...")
+    logging.basicConfig(level=logging.INFO)
+    run_web()
+    client.start()
+    client.run_until_disconnected()
