@@ -1,27 +1,29 @@
 ```python
+import os
 from telethon import TelegramClient, events
+from telethon.sessions import StringSession
 from flask import Flask
 import threading
 import hashlib
 import re
-import os
 
-# ===== تنظیمات (API خودت) =====
+# ===== تنظیمات =====
 API_ID = 31166081
 API_HASH = "5a19b28b0417beeb45b23cbf77586257"
 
-# کانال‌های منبع (سه تا)
+# گرفتن Session String از محیط Railway (حتماً آن را در Variables ست کرده‌ای)
+SESSION_STRING = os.environ.get("SESSION_STRING", "")
+
 SOURCE_CHANNELS = [
     "KhabarFori",
     "KhabarFooury",
     "akharinkhabar",
-    "Projectmeshkat"      # کانال مشکات
+    "Projectmeshkat"
 ]
 
 DEST_CHANNEL = "@yarakhabar"
 MY_SIGNATURE = "\n\n@YARAKHABAR📢\n🔷🔹🎯هر لحظه یک خبر تازه🎯🔹🔷"
 
-# کلمات ممنوعه (تبلیغ، شرط‌بندی و ...)
 BLOCKED_WORDS = [
     "تبلیغ", "خرید", "فروش", "کسب درآمد", "عضویت", "ارزان", "تخفیف",
     "ویژه", "همین الان", "کلیک کن", "دانلود", "فیلترشکن", "vpn",
@@ -31,7 +33,6 @@ BLOCKED_WORDS = [
     "فیلم سوپر", "عکس خصوصی", "همسریابی", "دوستیابی"
 ]
 
-# امضاهایی که باید از متن خبر حذف شوند
 TEXTS_TO_REMOVE = [
     "@akharinkhabar", "@Akharinkhabar", "@AKHARINKHABAR",
     "@KhabarFori", "@khabarfori", "@KHABARFORI", "@KhabarFooury",
@@ -40,15 +41,14 @@ TEXTS_TO_REMOVE = [
     "t.me/Projectmeshkat", "https://zil.ink/ProjectMeshkat"
 ]
 
-# ===== حافظه برای جلوگیری از تکراری‌ها =====
 recent_hashes = []
 MAX_HISTORY = 1000
 
 def normalize(text):
     if not text:
         return ""
-    text = text.replace("\u200c", " ")         # نیم‌فاصله
-    text = text.replace("ي", "ی").replace("ك", "ک")  # حروف عربی
+    text = text.replace("\u200c", " ")
+    text = text.replace("ي", "ی").replace("ك", "ک")
     text = re.sub(r"\s+", " ", text)
     return text.strip()
 
@@ -57,15 +57,13 @@ def clean_text(text):
         return ""
     for item in TEXTS_TO_REMOVE:
         text = text.replace(item, "")
-    text = re.sub(r"https?://\S+", "", text)   # حذف لینک‌ها
-    text = re.sub(r"@[^\s]+", "", text)        # حذف باقی‌مانده منشن‌ها
+    text = re.sub(r"https?://\S+", "", text)
+    text = re.sub(r"@[^\s]+", "", text)
     text = re.sub(r"\n\s*\n+", "\n", text)
     return text.strip()
 
 def is_rubbish(text):
-    if not text:
-        return True
-    if len(text.strip()) < 10:
+    if not text or len(text.strip()) < 10:
         return True
     return False
 
@@ -78,8 +76,8 @@ def contains_blocked(text):
 
 def simplify(text):
     text = normalize(text)
-    text = re.sub(r"\d+", "", text)            # حذف اعداد
-    text = re.sub(r"[^\w\s\u0600-\u06FF]", " ", text) # فقط حروف فارسی/انگلیسی
+    text = re.sub(r"\d+", "", text)
+    text = re.sub(r"[^\w\s\u0600-\u06FF]", " ", text)
     return " ".join(text.split()[:30])
 
 def get_hash(text):
@@ -93,8 +91,8 @@ def add_to_history(text):
     if len(recent_hashes) > MAX_HISTORY:
         recent_hashes.pop(0)
 
-# ===== اتصال تلگرام =====
-client = TelegramClient("yarakhabar_session", API_ID, API_HASH)
+# ===== استفاده از StringSession =====
+client = TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH)
 
 @client.on(events.NewMessage(chats=SOURCE_CHANNELS))
 async def handler(event):
@@ -104,30 +102,24 @@ async def handler(event):
         if not text.strip():
             return
 
-        # ۱. چک کردن کلمات تبلیغاتی (روی متن اصلی)
         if contains_blocked(text):
             print("⛔ تبلیغ")
             return
 
-        # ۲. حذف امضاها و لینک‌ها
         cleaned = clean_text(text)
-
-        # ۳. بررسی طول
-        if is_rubbish(cleaned) or len(cleaned) < 10:
-            print("⛔ کوتاه یا بی‌ارزش")
+        if is_rubbish(cleaned):
+            print("⛔ بی‌ارزش")
             return
 
-        # ۴. تشخیص تکراری
         if is_duplicate(cleaned):
             print("⛔ تکراری")
             return
 
         add_to_history(cleaned)
 
-        header = "🚨🌟❇️🚨"
+        header = "🚨🌟♦️🚨"
         final_text = f"{header}\n{cleaned}\n{header}{MY_SIGNATURE}"
 
-        # ۵. ارسال
         if msg.media:
             await client.send_message(DEST_CHANNEL, final_text, file=msg.media)
         else:
@@ -138,7 +130,7 @@ async def handler(event):
     except Exception as e:
         print("❌ خطا:", e)
 
-# ===== وب سرور (برای رایگان نخوابیدن در Railway) =====
+# ===== وب‌سرور =====
 app = Flask(__name__)
 
 @app.route("/")
@@ -148,9 +140,11 @@ def home():
 def run_web():
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
 
-# ===== اجرای همزمان ربات و وب‌سرور =====
 if __name__ == "__main__":
-    threading.Thread(target=run_web, daemon=True).start()
-    print("🚀 ربات خبری احسان شروع به کار کرد...")
-    with client:
-        client.run_until_disconnected()
+    if not SESSION_STRING:
+        print("❌ SESSION_STRING تنظیم نشده است. ربات راه‌اندازی نشد.")
+    else:
+        threading.Thread(target=run_web, daemon=True).start()
+        print("🚀 ربات با StringSession شروع کرد...")
+        with client:
+            client.run_until_disconnected()
