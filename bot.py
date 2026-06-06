@@ -124,7 +124,7 @@ async def handler(event):
 
         add_to_history(cleaned)
 
-        header = "🚨🌟♦️🚨"
+        header = "🚨🌟❇️🚨"
         final_text = f"{header}\n{cleaned}\n{header}{MY_SIGNATURE}"
 
         # ۵. ارسال
