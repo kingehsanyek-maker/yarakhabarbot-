@@ -1,4 +1,3 @@
-```python
 import os
 from telethon import TelegramClient, events
 from telethon.sessions import StringSession
@@ -11,7 +10,6 @@ import re
 API_ID = 31166081
 API_HASH = "5a19b28b0417beeb45b23cbf77586257"
 
-# گرفتن Session String از محیط Railway (حتماً آن را در Variables ست کرده‌ای)
 SESSION_STRING = os.environ.get("SESSION_STRING", "")
 
 SOURCE_CHANNELS = [
@@ -91,7 +89,6 @@ def add_to_history(text):
     if len(recent_hashes) > MAX_HISTORY:
         recent_hashes.pop(0)
 
-# ===== استفاده از StringSession =====
 client = TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH)
 
 @client.on(events.NewMessage(chats=SOURCE_CHANNELS))
