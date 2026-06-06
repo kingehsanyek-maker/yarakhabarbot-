@@ -5,6 +5,7 @@ import threading
 import hashlib
 import re
 import os
+import logging
 
 # =========================
 # تنظیمات
@@ -147,5 +148,9 @@ def run_web():
 if __name__ == "__main__":
     threading.Thread(target=run_web, daemon=True).start()
     print("🚀 User Client Started")
+
+    # 🔥 فعال‌سازی لاگ‌های Telethon
+    logging.basicConfig(level=logging.INFO)
+
     client.start()
     client.run_until_disconnected()
