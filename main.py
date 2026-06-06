@@ -31,12 +31,44 @@ BLOCKED_WORDS = [
     "فیلم سوپر", "عکس خصوصی", "همسریابی", "دوستیابی"
 ]
 
+# ===== لیست جامع امضاها و لینک‌های منبع (همه شکل‌های ممکن) =====
 TEXTS_TO_REMOVE = [
+    # --- akharinkhabar (همه حالت‌ها) ---
     "@akharinkhabar", "@Akharinkhabar", "@AKHARINKHABAR",
-    "@KhabarFori", "@khabarfori", "@KHABARFORI", "@KhabarFooury",
-    "@Projectmeshkat", "@projectmeshkat", "Projectmeshkat",
-    "آخرین خبر در روبیکا", "آخرین خبر در ایتا", "آخرین خبر در بله",
-    "t.me/Projectmeshkat", "https://zil.ink/ProjectMeshkat"
+    "akharinkhabar", "Akharinkhabar", "AKHARINKHABAR",
+    "@akharinkhabar | akharinkhabar.ir",
+    "@Akharinkhabar | akharinkhabar.ir",
+    "| akharinkhabar.ir", " | akharinkhabar.ir",
+    "akharinkhabar.ir", "www.akharinkhabar.ir",
+    "http://akharinkhabar.ir", "https://akharinkhabar.ir",
+    "http://www.akharinkhabar.ir", "https://www.akharinkhabar.ir",
+    "t.me/akharinkhabar", "https://t.me/akharinkhabar",
+    "t.me/Akharinkhabar", "https://t.me/Akharinkhabar",
+    "#akharinkhabar", "#Akharinkhabar",
+    # --- KhabarFori (همه حالت‌ها) ---
+    "@KhabarFori", "@khabarfori", "@KHABARFORI",
+    "KhabarFori", "khabarfori", "KHABARFORI",
+    "@KhabarFori |", "| KhabarFori",
+    "t.me/KhabarFori", "https://t.me/KhabarFori",
+    "t.me/khabarfori", "https://t.me/khabarfori",
+    "#KhabarFori", "#khabarfori",
+    # --- KhabarFooury (همه حالت‌ها) ---
+    "@KhabarFooury", "@khabarfooury", "@KHABARFOOURY",
+    "KhabarFooury", "khabarfooury",
+    "t.me/KhabarFooury", "https://t.me/KhabarFooury",
+    "#KhabarFooury",
+    # --- Projectmeshkat (همه حالت‌ها) ---
+    "@Projectmeshkat", "@projectmeshkat", "@PROJECTMESHKAT",
+    "Projectmeshkat", "projectmeshkat",
+    "t.me/Projectmeshkat", "https://t.me/Projectmeshkat",
+    "zil.ink/ProjectMeshkat", "https://zil.ink/ProjectMeshkat",
+    "#Projectmeshkat", "#projectmeshkat",
+    # --- عبارات فارسی و دیگر زائده‌ها ---
+    "آخرین خبر در روبیکا",
+    "آخرین خبر در ایتا",
+    "آخرین خبر در بله",
+    "پایگاه خبری", "خبرگزاری",
+    "⭕️", "🔹", "🔺", "🔻", "▫️", "▪️",  # ایموجی‌های اضافی که ممکن است فقط برای تزئین باشند (اختیاری)
 ]
 
 recent_hashes = []
@@ -53,10 +85,14 @@ def normalize(text):
 def clean_text(text):
     if not text:
         return ""
+    # اول لینک‌های http/https را کاملاً حذف می‌کنیم (حتی اگر در TEXTS_TO_REMOVE نباشند)
+    text = re.sub(r"https?://\S+", "", text)
+    # بعد امضاهای مشخص را حذف می‌کنیم
     for item in TEXTS_TO_REMOVE:
         text = text.replace(item, "")
-    text = re.sub(r"https?://\S+", "", text)
+    # باقی‌ماندهٔ منشن‌ها (هرچیزی که با @ شروع می‌شود) را پاک می‌کنیم
     text = re.sub(r"@[^\s]+", "", text)
+    # حذف خط‌های خالی اضافی
     text = re.sub(r"\n\s*\n+", "\n", text)
     return text.strip()
 
