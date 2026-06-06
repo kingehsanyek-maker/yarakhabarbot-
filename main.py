@@ -19,7 +19,6 @@ SOURCE_CHANNELS = [
     "akharinkhabar"
 ]
 
-# 🔥 Chat ID واقعی کانال یارا خبر
 DEST_CHANNEL = -1002471046678
 
 MY_SIGNATURE = "\n\n@YARAKHABAR📢\n🔷🔹🎯هر لحظه یک خبر تازه🎯🔹🔷"
@@ -60,18 +59,11 @@ def clean(text):
     return text.strip()
 
 def is_rubbish(text):
-    if not text:
-        return True
-    if len(text.strip()) < 10:
-        return True
-    return False
+    return not text or len(text.strip()) < 10
 
 def contains_blocked(text):
     text = normalize(text).lower()
-    for bad in BLOCKED_WORDS:
-        if bad.lower() in text:
-            return True
-    return False
+    return any(bad.lower() in text for bad in BLOCKED_WORDS)
 
 def simplify(text):
     text = normalize(text)
@@ -103,22 +95,15 @@ async def handler(event):
 
         if is_rubbish(cleaned):
             return
-
         if contains_blocked(cleaned):
             return
-
         if is_duplicate(cleaned):
             return
 
         add_history(cleaned)
 
         header = "🚨🌟♦️🚨"
-        final_text = (
-            f"{header}\n"
-            f"{cleaned}\n"
-            f"{header}"
-            f"{MY_SIGNATURE}"
-        )
+        final_text = f"{header}\n{cleaned}\n{header}{MY_SIGNATURE}"
 
         if msg.media:
             await client.send_message(DEST_CHANNEL, final_text, file=msg.media)
@@ -145,12 +130,12 @@ def run_web():
 # =========================
 # اجرا
 # =========================
+def start_bot():
+    logging.basicConfig(level=logging.INFO)
+    client.start()
+    client.run_until_disconnected()
+
 if __name__ == "__main__":
     threading.Thread(target=run_web, daemon=True).start()
     print("🚀 User Client Started")
-
-    # 🔥 فعال‌سازی لاگ‌های Telethon
-    logging.basicConfig(level=logging.INFO)
-
-    client.start()
-    client.run_until_disconnected()
+    start_bot()
