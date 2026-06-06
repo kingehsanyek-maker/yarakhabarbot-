@@ -1,6 +1,0 @@
-telethon==1.34.0
-python-telegram-bot==20.3
-requests
-feedparser
-flask
-python-dotenv
