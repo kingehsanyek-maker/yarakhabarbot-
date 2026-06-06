@@ -5,27 +5,22 @@ import threading
 import hashlib
 import re
 import os
-from dotenv import load_dotenv
-
-# =========================
-# بارگذاری متغیرهای محیطی
-# =========================
-load_dotenv()
-
-API_ID = int(os.getenv("API_ID"))
-API_HASH = os.getenv("API_HASH")
-BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 # =========================
 # تنظیمات
 # =========================
+API_ID = 31166081
+API_HASH = "5a19b28b0417beeb45b23cbf77586257"
+
 SOURCE_CHANNELS = [
     "KhabarFori",
     "KhabarFooury",
     "akharinkhabar"
 ]
 
-DEST_CHANNEL = "@YARAKHABAR"
+# 🔥 Chat ID واقعی کانال یارا خبر
+DEST_CHANNEL = -1002471046678
+
 MY_SIGNATURE = "\n\n@YARAKHABAR📢\n🔷🔹🎯هر لحظه یک خبر تازه🎯🔹🔷"
 
 BLOCKED_WORDS = [
@@ -43,14 +38,8 @@ TEXTS_TO_REMOVE = [
     "آخرین خبر در روبیکا", "آخرین خبر در ایتا", "آخرین خبر در بله"
 ]
 
-# =========================
-# حافظه خبرهای اخیر
-# =========================
 recent_hashes = deque(maxlen=1000)
 
-# =========================
-# توابع کمکی
-# =========================
 def normalize(text):
     if not text:
         return ""
@@ -99,39 +88,25 @@ def add_history(text):
     recent_hashes.append(get_hash(text))
 
 # =========================
-# تلگرام
+# User Client
 # =========================
-client = TelegramClient(
-    "yarakhabar_session",
-    API_ID,
-    API_HASH
-).start(bot_token=BOT_TOKEN)
+client = TelegramClient("yarakhabar_user", API_ID, API_HASH)
 
 @client.on(events.NewMessage(chats=SOURCE_CHANNELS))
 async def handler(event):
     try:
         msg = event.message
-
         text = msg.message or ""
-        if not text.strip():
-            return
 
         cleaned = clean(text)
 
         if is_rubbish(cleaned):
-            print("⛔ بی‌ارزش")
             return
 
         if contains_blocked(cleaned):
-            print("⛔ تبلیغ")
-            return
-
-        if len(cleaned) < 10:
-            print("⛔ کوتاه")
             return
 
         if is_duplicate(cleaned):
-            print("⛔ تکراری")
             return
 
         add_history(cleaned)
@@ -145,16 +120,10 @@ async def handler(event):
         )
 
         if msg.media:
-            await client.send_message(
-                DEST_CHANNEL,
-                final_text,
-                file=msg.media
-            )
+            await client.send_message(DEST_CHANNEL, final_text, file=msg.media)
         else:
-            await client.send_message(
-                DEST_CHANNEL,
-                final_text
-            )
+            await client.send_message(DEST_CHANNEL, final_text)
+
         print("✅ ارسال شد")
 
     except Exception as e:
@@ -167,23 +136,16 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "YaraKhabar Bot Running"
+    return "YaraKhabar User Client Running"
 
 def run_web():
-    app.run(
-        host="0.0.0.0",
-        port=int(os.environ.get("PORT", 5000)),
-        threaded=True
-    )
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
 
 # =========================
 # اجرا
 # =========================
 if __name__ == "__main__":
-    threading.Thread(
-        target=run_web,
-        daemon=True
-    ).start()
-
-    print("🚀 YaraKhabar Started")
+    threading.Thread(target=run_web, daemon=True).start()
+    print("🚀 User Client Started")
+    client.start()
     client.run_until_disconnected()
