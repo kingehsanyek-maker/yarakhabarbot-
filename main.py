@@ -112,30 +112,4 @@ async def handler(event):
 
         print("✅ ارسال شد")
 
-    except Exception as e:
-        print("❌ خطا:", e)
-
-# =========================
-# وب سرور
-# =========================
-app = Flask(__name__)
-
-@app.route("/")
-def home():
-    return "YaraKhabar User Client Running"
-
-def run_web():
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
-
-# =========================
-# اجرا
-# =========================
-def start_bot():
-    logging.basicConfig(level=logging.INFO)
-    client.start()
-    client.run_until_disconnected()
-
-if __name__ == "__main__":
-    threading.Thread(target=run_web, daemon=True).start()
-    print("🚀 User Client Started")
-    start_bot()
+    except Exception
