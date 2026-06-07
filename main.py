@@ -79,7 +79,7 @@ TOPIC_EMOJI = {
     "دانشگاه": "🎓", "مدرسه": "🏫",
 }
 
-DEFAULT_EMOJIS = ("🌟", "❇️", "✨")   # سه ایموجی پیش‌فرض برای خبر معمولی
+DEFAULT_EMOJIS = ("🌟", "❇️", "✨")
 
 BLOCKED_WORDS = [
     "تبلیغ", "خرید", "فروش", "کسب درآمد", "عضویت", "ارزان", "تخفیف",
@@ -182,6 +182,20 @@ def generate_header(text):
 
     return f"🚨{final[0]}{final[1]}{final[2]}🚨"
 
+def format_news(cleaned_text):
+    """اولین خط (تیتر) را بولد و متن را جدا می‌کند"""
+    lines = cleaned_text.split('\n', 1)
+    if len(lines) >= 1:
+        # تیتر (خط اول) را بولد می‌کنیم
+        title = f"**{lines[0].strip()}**"
+        # بقیهٔ متن
+        rest = lines[1].strip() if len(lines) > 1 else ""
+        if rest:
+            return f"{title}\n{rest}"
+        else:
+            return title
+    return cleaned_text
+
 client = TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH)
 dest_entity = None
 
@@ -213,23 +227,46 @@ async def handler(event):
         add_to_history(cleaned)
 
         header = generate_header(cleaned)
-        final_text = f"{header}\n{cleaned}\n{MY_SIGNATURE}"
+        formatted_body = format_news(cleaned)
+        # ساختار نهایی: header + متن بولدشده + امضا
+        final_text = f"{header}\n{formatted_body}{MY_SIGNATURE}"
 
         global dest_entity
         for attempt in range(3):
             try:
                 if dest_entity is None:
                     await resolve_dest()
+                # ارسال با Markdown (برای فعال شدن **بولد**)
                 if msg.media:
-                    await client.send_message(dest_entity or DEST_CHANNEL, final_text, file=msg.media)
+                    await client.send_message(
+                        dest_entity or DEST_CHANNEL,
+                        final_text,
+                        file=msg.media,
+                        parse_mode='md'
+                    )
                 else:
-                    await client.send_message(dest_entity or DEST_CHANNEL, final_text)
+                    await client.send_message(
+                        dest_entity or DEST_CHANNEL,
+                        final_text,
+                        parse_mode='md'
+                    )
                 print("✅ ارسال شد")
                 break
             except FloodWaitError as e:
                 print(f"⏳ FloodWait: {e.seconds}s"); await asyncio.sleep(e.seconds)
             except Exception as e:
-                print(f"❌ خطای ارسال (تلاش {attempt+1}): {e}"); await asyncio.sleep(5)
+                # اگر parse_mode خطا داد (مثلاً کاراکترهای رزرو شده Markdown)،
+                # بدون parse_mode دوباره تلاش کن
+                try:
+                    if msg.media:
+                        await client.send_message(dest_entity or DEST_CHANNEL, final_text, file=msg.media)
+                    else:
+                        await client.send_message(dest_entity or DEST_CHANNEL, final_text)
+                    print("✅ ارسال شد (بدون Markdown)")
+                    break
+                except Exception as e2:
+                    print(f"❌ خطای ارسال (تلاش {attempt+1}): {e2}")
+                await asyncio.sleep(5)
         else:
             print("❌ ارسال پس از ۳ تلاش ناموفق ماند.")
 
@@ -258,7 +295,7 @@ if __name__ == "__main__":
     else:
         threading.Thread(target=memory_cleaner, daemon=True).start()
         threading.Thread(target=run_web, daemon=True).start()
-        print("🚀 ربات حرفه‌ای احسان (سه ایموجی، بدون توهین به غیراسرائیل) روشن شد...")
+        print("🚀 ربات حرفه‌ای احسان (تیتر بولد + سه ایموجی) روشن شد...")
         with client:
             client.loop.run_until_complete(resolve_dest())
             client.run_until_disconnected()
