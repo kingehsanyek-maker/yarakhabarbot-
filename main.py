@@ -3,7 +3,7 @@ from telethon import TelegramClient, events
 from telethon.sessions import StringSession
 from telethon.errors import FloodWaitError
 from flask import Flask
-import threading, hashlib, re
+import threading, difflib, re
 
 # ===== تنظیمات =====
 API_ID = 31166081
@@ -14,43 +14,21 @@ SOURCE_CHANNELS = ["KhabarFori", "KhabarFooury", "akharinkhabar", "Projectmeshka
 DEST_CHANNEL = "@yarakhabar"
 MY_SIGNATURE = "\n@YARAKHABAR📢\n🔷🔹🎯هر لحظه یک خبر تازه🎯🔹🔷"
 
-# ===== دیکشنری ۳۰۰ کلمه کلیدی با ایموجی =====
-KEYWORD_EMOJI = {
-    # آمریکا و مقامات (توهین‌آمیز)
-    "ترامپ": "🐒", "بایدن": "🐒", "پنس": "🐒", "هریس": "🐒",
-    "آمریکا": "🐒", "ایالات متحده": "🐒", "واشنگتن": "🐒",
-    "کاخ سفید": "🐒", "سیا": "🐒", "اف‌بی‌آی": "🐒",
-
-    # اسرائیل (توهین‌آمیز)
+# ===== کلمات کلیدی کشورها / مقامات =====
+COUNTRY_EMOJI = {
+    # اسرائیل (استثنا: موش می‌ماند)
     "اسرائیل": "🐀", "نتانیاهو": "🐀", "صهیونیست": "🐀",
-    "تل‌آویو": "🐀", "موساد": "🐀",
-
-    # زلنسکی (توهین‌آمیز)
-    "زلنسکی": "🐴",
-
-    # روسیه (با احترام)
+    "تل‌آویو": "🐀", "موساد": "🐀", "فلسطین اشغالی": "🐀",
+    # بقیهٔ جهان (همه پرچم یا نماد محترمانه)
+    "آمریکا": "🇺🇸", "ایالات متحده": "🇺🇸", "واشنگتن": "🇺🇸",
+    "ترامپ": "🇺🇸", "بایدن": "🇺🇸", "کاخ سفید": "🇺🇸",
     "روسیه": "🇷🇺", "پوتین": "🇷🇺", "مسکو": "🇷🇺", "کرملین": "🇷🇺",
-
-    # چین
     "چین": "🇨🇳", "شی جین پینگ": "🇨🇳", "پکن": "🇨🇳",
-
-    # ایران
     "ایران": "🇮🇷", "تهران": "🇮🇷", "سپاه": "🇮🇷", "بسیج": "🇮🇷",
-
-    # فرانسه
     "فرانسه": "🇫🇷", "مکرون": "🇫🇷", "پاریس": "🇫🇷",
-
-    # انگلستان
-    "انگلیس": "🇬🇧", "بریتانیا": "🇬🇧", "لندن": "🇬🇧",
-    "بوریس جانسون": "🇬🇧", "شاه چارلز": "🇬🇧",
-
-    # آلمان
+    "انگلیس": "🇬🇧", "بریتانیا": "🇬🇧", "لندن": "🇬🇧", "بوریس جانسون": "🇬🇧",
     "آلمان": "🇩🇪", "برلین": "🇩🇪", "شولتز": "🇩🇪",
-
-    # اوکراین (پرچم، ولی زلنسکی توهین‌آمیز)
-    "اوکراین": "🇺🇦", "کیف": "🇺🇦",
-
-    # سایر کشورها (همه پرچم)
+    "اوکراین": "🇺🇦", "کیف": "🇺🇦", "زلنسکی": "🇺🇦",
     "هند": "🇮🇳", "پاکستان": "🇵🇰", "افغانستان": "🇦🇫",
     "ترکیه": "🇹🇷", "عربستان": "🇸🇦", "امارات": "🇦🇪",
     "ژاپن": "🇯🇵", "کره جنوبی": "🇰🇷", "کره شمالی": "🇰🇵",
@@ -64,49 +42,44 @@ KEYWORD_EMOJI = {
     "قطر": "🇶🇦", "کویت": "🇰🇼", "بحرین": "🇧🇭",
     "عمان": "🇴🇲", "اردن": "🇯🇴", "جمهوری آذربایجان": "🇦🇿",
     "ارمنستان": "🇦🇲", "گرجستان": "🇬🇪", "قزاقستان": "🇰🇿",
-
     # سازمان‌ها
     "ناتو": "🛡️", "سازمان ملل": "🇺🇳", "اتحادیه اروپا": "🇪🇺",
+}
 
+# ===== کلمات کلیدی موضوعات =====
+TOPIC_EMOJI = {
+    # ورزش
+    "فوتبال": "⚽", "والیبال": "🏐", "کشتی": "🤼", "بسکتبال": "🏀",
+    "ورزش": "🏅", "المپیک": "🏟️", "تنیس": "🎾", "شنا": "🏊",
+    "دوچرخه‌سواری": "🚴", "وزنه‌برداری": "🏋️", "بوکس": "🥊",
+    "طلایی": "🥇", "نقره": "🥈", "برنز": "🥉",
     # نظامی و بحران
     "جنگ": "⚔️", "حمله": "💣", "موشک": "🚀", "پدافند": "🛡️",
     "هسته‌ای": "☢️", "شیمیایی": "🧪", "پهپاد": "🛸",
     "زلزله": "🌍", "سیل": "🌊", "طوفان": "🌀", "آتش‌سوزی": "🔥",
     "انفجار": "💥", "بمب": "💣", "گروگان": "🔒", "ترور": "🔫",
-
-    # ورزش
-    "فوتبال": "⚽", "والیبال": "🏐", "کشتی": "🤼", "بسکتبال": "🏀",
-    "ورزش": "🏅", "المپیک": "🏟️", "تنیس": "🎾", "شنا": "🏊",
-    "دوچرخه‌سواری": "🚴", "وزنه‌برداری": "🏋️", "بوکس": "🥊",
-
     # اقتصاد و انرژی
     "اقتصاد": "💰", "نفت": "🛢️", "گاز": "🔥", "بورس": "📈",
     "تورم": "📉", "دلار": "💵", "یورو": "💶", "ارز": "💱",
     "تحریم": "🚫", "صادرات": "📦", "واردات": "📥",
-
+    # دیپلماسی و سیاست
+    "انتخابات": "🗳️", "رئیس‌جمهور": "🎩", "نخست‌وزیر": "👔",
+    "دولت": "🏛️", "مجلس": "🏛️", "قانون": "📜",
+    "مذاکره": "🤝", "توافق": "📝", "معاهده": "🕊️",
+    "سفر": "✈️", "دیدار": "🤝", "نشست": "👥",
+    "اعتراض": "✊", "تظاهرات": "🚩",
     # سلامت و فناوری
     "کرونا": "😷", "واکسن": "💉", "بیمارستان": "🏥",
     "پزشکی": "🩺", "هوش مصنوعی": "🤖", "فضا": "🚀",
     "اینترنت": "🌐", "ماهواره": "🛰️",
-
     # حوادث
-    "تصادف": "🚗", "سقوط هواپیما": "✈️",
-    "ریزش ساختمان": "🏚️", "غرق": "🚢",
-
-    # سیاست و دیپلماسی
-    "انتخابات": "🗳️", "رئیس‌جمهور": "🎩", "نخست‌وزیر": "👔",
-    "دولت": "🏛️", "مجلس": "🏛️", "قانون": "📜",
-    "مذاکره": "🤝", "توافق": "📝", "معاهده": "🕊️",
-    "اعتراض": "✊", "تظاهرات": "🚩",
-
-    # سایر
-    "سفر": "✈️", "دیدار": "🤝", "نشست": "👥",
+    "تصادف": "🚗", "سقوط هواپیما": "✈️", "ریزش ساختمان": "🏚️", "غرق": "🚢",
+    # فرهنگ و هنر
     "فرهنگ": "🎭", "هنر": "🎨", "سینما": "🎬", "موسیقی": "🎵",
     "دانشگاه": "🎓", "مدرسه": "🏫",
 }
 
-# ایموجی پیش‌فرض برای خبرهای معمولی
-DEFAULT_EMOJIS = ("🌟", "❇️")
+DEFAULT_EMOJIS = ("🌟", "❇️", "✨")   # سه ایموجی پیش‌فرض برای خبر معمولی
 
 BLOCKED_WORDS = [
     "تبلیغ", "خرید", "فروش", "کسب درآمد", "عضویت", "ارزان", "تخفیف",
@@ -130,8 +103,8 @@ TEXTS_TO_REMOVE = [
     "آخرین خبر در روبیکا", "آخرین خبر در ایتا", "آخرین خبر در بله",
 ]
 
-recent_hashes = []
-MAX_HISTORY = 1000
+recent_texts = []
+MAX_HISTORY = 200
 
 def normalize(text):
     if not text: return ""
@@ -156,52 +129,58 @@ def is_rubbish(text):
 def contains_blocked(text):
     return any(bad in normalize(text).lower() for bad in BLOCKED_WORDS)
 
-def simplify(text):
-    text = normalize(text)
-    text = re.sub(r"\d+", "", text)
-    text = re.sub(r"[^\w\s\u0600-\u06FF]", " ", text)
-    return " ".join(text.split()[:30])
-
-def get_hash(text):
-    return hashlib.md5(simplify(text).encode()).hexdigest()
-
-def is_duplicate(text):
-    return get_hash(text) in recent_hashes
+def is_similar(new_text, threshold=0.8):
+    for old_text in recent_texts:
+        similarity = difflib.SequenceMatcher(None, new_text, old_text).ratio()
+        if similarity >= threshold:
+            return True
+    return False
 
 def add_to_history(text):
-    recent_hashes.append(get_hash(text))
-    if len(recent_hashes) > MAX_HISTORY: recent_hashes.pop(0)
+    recent_texts.append(text)
+    if len(recent_texts) > MAX_HISTORY:
+        recent_texts.pop(0)
 
 def generate_header(text):
     norm = normalize(text).lower()
-    found = []
-    for keyword, emoji in KEYWORD_EMOJI.items():
-        if keyword in norm:
-            found.append(emoji)
-    uniq = []
-    for em in found:
-        if em not in uniq:
-            uniq.append(em)
-    found = uniq
+    countries = []
+    topics = []
 
-    if not found:
-        return f"🚨{DEFAULT_EMOJIS[0]}{DEFAULT_EMOJIS[1]}🚨"
+    # جمع‌آوری کشورها
+    for keyword, emoji in COUNTRY_EMOJI.items():
+        if keyword in norm and emoji not in countries:
+            countries.append(emoji)
 
-    if len(found) == 1:
-        single = found[0]
-        text_has_israel = any(w in norm for w in ["اسرائیل", "نتانیاهو", "صهیونیست", "تل‌آویو"])
-        text_has_us = any(w in norm for w in ["آمریکا", "ترامپ", "بایدن", "پنس", "ایالات متحده", "واشنگتن", "کاخ سفید"])
-        text_has_zelensky = "زلنسکی" in norm
+    # جمع‌آوری موضوعات
+    for keyword, emoji in TOPIC_EMOJI.items():
+        if keyword in norm and emoji not in topics:
+            topics.append(emoji)
 
-        if single == "🐀" and text_has_israel:
-            return "🚨💩🐀🚨"
-        if single == "🐒" and text_has_us:
-            return "🚨🐒🐷🚨"
-        if single == "🐴" and text_has_zelensky:
-            return "🚨🐴🐴🚨"
-        return f"🚨{single}{single}🚨"
+    # ساخت لیست نهایی ۳ تایی
+    final = []
+    # ۱. کشور اول (اگر هست)
+    if countries:
+        final.append(countries[0])
+    # ۲. موضوع اول (اگر هست)
+    if topics:
+        final.append(topics[0])
+    # ۳. کشور دوم (اگر هست) وگرنه موضوع دوم (اگر هست) وگرنه ایموجی پیش‌فرض
+    if len(countries) > 1:
+        final.append(countries[1])
+    elif len(topics) > 1:
+        final.append(topics[1])
+    else:
+        # هنوز جا داریم، با پیش‌فرض‌ها پر می‌کنیم
+        pass
 
-    return f"🚨{found[0]}{found[1]}🚨"
+    # پر کردن تا ۳ ایموجی
+    while len(final) < 3:
+        for d in DEFAULT_EMOJIS:
+            if d not in final:
+                final.append(d)
+                break
+
+    return f"🚨{final[0]}{final[1]}{final[2]}🚨"
 
 client = TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH)
 dest_entity = None
@@ -228,7 +207,7 @@ async def handler(event):
         if is_rubbish(cleaned):
             print("⛔ بی‌ارزش"); return
 
-        if is_duplicate(cleaned):
+        if is_similar(cleaned):
             print("⛔ تکراری"); return
 
         add_to_history(cleaned)
@@ -262,8 +241,8 @@ async def handler(event):
 def memory_cleaner():
     while True:
         time.sleep(6 * 3600)
-        if len(recent_hashes) > 200:
-            del recent_hashes[:-200]
+        if len(recent_texts) > 200:
+            del recent_texts[:-200]
             print("🧹 حافظه پاکسازی شد.")
 
 app = Flask(__name__)
@@ -279,7 +258,7 @@ if __name__ == "__main__":
     else:
         threading.Thread(target=memory_cleaner, daemon=True).start()
         threading.Thread(target=run_web, daemon=True).start()
-        print("🚀 ربات خبری هوشمند احسان با ۳۰۰ کلمهٔ کلیدی روشن شد...")
+        print("🚀 ربات حرفه‌ای احسان (سه ایموجی، بدون توهین به غیراسرائیل) روشن شد...")
         with client:
             client.loop.run_until_complete(resolve_dest())
             client.run_until_disconnected()
