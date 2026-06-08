@@ -10,9 +10,7 @@ API_HASH = "5a19b28b0417beeb45b23cbf77586257"
 SESSION_STRING = os.environ.get("SESSION_STRING", "")
 SOURCE_CHANNELS = ["KhabarFori", "KhabarFooury", "akharinkhabar", "Projectmeshkat"]
 DEST_CHANNEL = "@yarakhabar"
-
-# امضای جدید بدون @ (لینک متنی)
-MY_SIGNATURE = "\n\n[یاراخبر](https://t.me/yarakhabar)📢\n🔷🔹🎯هر لحظه یک خبر تازه🎯🔹🔷"
+MY_SIGNATURE = "\n@YARAKHABAR📢\n🔷🔹🎯هر لحظه یک خبر تازه🎯🔹🔷"
 
 # ===== لیست‌های واژگان =====
 PERSONS = {
@@ -274,6 +272,7 @@ def add_to_history(text):
         recent_texts.pop(0)
 
 def tokenize(text):
+    """ شکستن متن به کلمات (حذف علائم) """
     return re.findall(r'\w+', normalize(text))
 
 def generate_header(text):
@@ -284,37 +283,43 @@ def generate_header(text):
     countries = []
     topics = []
 
+    # جستجوی اشخاص (پرچم کشور)
     for token in tokens:
         if token in PERSONS:
             emoji = PERSONS[token]
             if emoji not in countries:
                 countries.append(emoji)
 
+    # جستجوی اماکن (پرچم)
     for token in tokens:
         if token in PLACES:
             emoji = PLACES[token]
             if emoji not in countries:
                 countries.append(emoji)
 
+    # جستجوی موضوعات نظامی (با رفع ابهام کشتی)
     for token in tokens:
         if token in MILITARY:
             if token == "کشتی" and has_sports:
-                continue
+                continue  # اگر زمینه ورزشی است، کشتی نظامی نادیده گرفته می‌شود
             emoji = MILITARY[token]
             if emoji not in topics:
                 topics.append(emoji)
 
+    # جستجوی موضوعات ورزشی / عمومی
     for token in tokens:
         if token in TOPICS:
             emoji = TOPICS[token]
             if emoji not in topics:
                 topics.append(emoji)
+        # واژگان اضافی با دو ایموجی (اولی جدا، دومی جدا)
         if token in EXTRA_TOPICS:
-            emojis = list(EXTRA_TOPICS[token])
+            emojis = list(EXTRA_TOPICS[token])  # رشته را به لیست کاراکترهای اموجی تبدیل می‌کند
             for e in emojis:
                 if e not in topics:
                     topics.append(e)
 
+    # حذف تکراری‌ها با حفظ ترتیب
     uniq_countries = []
     for c in countries:
         if c not in uniq_countries:
@@ -324,21 +329,27 @@ def generate_header(text):
         if t not in uniq_topics:
             uniq_topics.append(t)
 
+    # ساخت header سه‌تایی
     final = []
+    # اولویت: کشور اول
     if uniq_countries:
         final.append(uniq_countries[0])
+    # سپس موضوع اول
     if uniq_topics:
         final.append(uniq_topics[0])
+    # سپس کشور دوم (اگر هست) وگرنه موضوع دوم وگرنه پیش‌فرض
     if len(uniq_countries) > 1:
         final.append(uniq_countries[1])
     elif len(uniq_topics) > 1:
         final.append(uniq_topics[1])
     else:
+        # پر کردن با ایموجی‌های پیش‌فرض غیرتکراری
         for d in DEFAULT_EMOJIS:
             if d not in final:
                 final.append(d)
                 break
 
+    # پر کردن تا سه ایموجی
     while len(final) < 3:
         for d in DEFAULT_EMOJIS:
             if d not in final:
@@ -450,7 +461,7 @@ if __name__ == "__main__":
     else:
         threading.Thread(target=memory_cleaner, daemon=True).start()
         threading.Thread(target=run_web, daemon=True).start()
-        print("🚀 ربات فوق‌حرفه‌ای احسان (امضای بدون @) روشن شد...")
+        print("🚀 ربات فوق‌حرفه‌ای احسان روشن شد (تشخیص کلمات با مرز + ابهام‌زدایی)")
         with client:
             client.loop.run_until_complete(resolve_dest())
             client.run_until_disconnected()
