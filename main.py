@@ -8,7 +8,7 @@ from flask import Flask
 API_ID = 31166081
 API_HASH = "5a19b28b0417beeb45b23cbf77586257"
 SESSION_STRING = os.environ.get("SESSION_STRING", "")
-SOURCE_CHANNELS = ["KhabarFori", "KhabarFooury", "akharinkhabar", "Projectmeshkat"]
+SOURCE_CHANNELS = ["KhabarFoi", "KhabrFooury", "akharinkhabar", "Projectmeshkat"]
 DEST_CHANNEL = "@yarakhabar"
 MY_SIGNATURE = "\n@YARAKHABAR📢\n🔷🔹🎯هر لحظه یک خبر تازه🎯🔹🔷"
 
@@ -224,7 +224,7 @@ TEXTS_TO_REMOVE = [
     "@akharinkhabar", "@Akharinkhabar", "@AKHARINKHABAR",
     "akharinkhabar", "Akharinkhabar", "AKHARINKHABAR",
     "| akharinkhabar.ir", "akharinkhabar.ir",
-    "t.me/akharinkhabar", "https://t.me/akharinkhab",
+    "t.me/akharinkhabar", "https://t.me/akharinkhabar",
     "@KhabarFori", "@khabarfori", "@KHABARFORI",
     "t.me/KhabarFori", "https://t.me/KhabarFori",
     "@KhabarFooury", "t.me/KhabarFooury",
