@@ -224,7 +224,7 @@ TEXTS_TO_REMOVE = [
     "@akharinkhabar", "@Akharinkhabar", "@AKHARINKHABAR",
     "akharinkhabar", "Akharinkhabar", "AKHARINKHABAR",
     "| akharinkhabar.ir", "akharinkhabar.ir",
-    "t.me/akharinkhabar", "https://t.me/akharinkhabar",
+    "t.me/akharinkhabar", "https://t.me/akharinkhab",
     "@KhabarFori", "@khabarfori", "@KHABARFORI",
     "t.me/KhabarFori", "https://t.me/KhabarFori",
     "@KhabarFooury", "t.me/KhabarFooury",
