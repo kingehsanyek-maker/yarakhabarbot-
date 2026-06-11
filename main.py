@@ -8,18 +8,19 @@ from flask import Flask
 API_ID = 31166081
 API_HASH = "5a19b28b0417beeb45b23cbf77586257"
 SESSION_STRING = os.environ.get("SESSION_STRING", "")
-SOURCE_CHANNELS = ["KhabarFori", "KhabarFooury", "akharinkhabar", "Projectmeshkat"]
+SOURCE_CHANNELS = ["akharinkhabar", "Projectmeshkat"]
 DEST_CHANNEL = "@yarakhabar"
 MY_SIGNATURE = "\n@YARAKHABAR📢\n🔷🔹🎯هر لحظه یک خبر تازه🎯🔹🔷"
 
-# ===== لیست‌های واژگان (کامل) =====
+# ===== لیست‌های واژگان =====
 PERSONS = {
+    # ایران
     "پزشکیان": "🇮🇷", "مسعود پزشکیان": "🇮🇷", "عراقچی": "🇮🇷",
     "سید عباس عراقچی": "🇮🇷", "ظریف": "🇮🇷", "محمدجواد ظریف": "🇮🇷",
     "قالیباف": "🇮🇷", "محمدباقر قالیباف": "🇮🇷", "خامنه‌ای": "🇮🇷",
     "علی خامنه‌ای": "🇮🇷", "رئیسی": "🇮🇷", "ابراهیم رئیسی": "🇮🇷",
     "احمدی‌نژاد": "🇮🇷", "محمود احمدی‌نژاد": "🇮🇷",
-    "روحانی": "🇮🇷", "حسن روحانی": "🇮٬", "خاتمی": "🇮🇷",
+    "روحانی": "🇮🇷", "حسن روحانی": "🇮🇷", "خاتمی": "🇮🇷",
     "سید محمد خاتمی": "🇮🇷", "لاریجانی": "🇮🇷", "علی لاریجانی": "🇮🇷",
     "آملی لاریجانی": "🇮🇷", "صادق آملی لاریجانی": "🇮🇷",
     "محسن رضایی": "🇮🇷", "سعید جلیلی": "🇮🇷", "علی‌اکبر ولایتی": "🇮🇷",
@@ -27,21 +28,23 @@ PERSONS = {
     "عبدالناصر همتی": "🇮🇷", "محمدباقر نوبخت": "🇮🇷",
     "محمد نهاوندیان": "🇮🇷", "سید حسن خمینی": "🇮🇷",
     "اسماعیل بقائی": "🇮🇷", "حسین امیرعبداللهیان": "🇮🇷",
-    "علی شمخانی": "🇮🇷", "محمد مخبر": "🇮🇷", "عزت‌الله ضرغامی": "🇮٬",
+    "علی شمخانی": "🇮🇷", "محمد مخبر": "🇮🇷", "عزت‌الله ضرغامی": "🇮🇷",
     "غلامعلی حدادعادل": "🇮🇷", "غلامحسین محسنی اژه‌ای": "🇮🇷",
     "اکبر هاشمی رفسنجانی": "🇮🇷", "محسن هاشمی": "🇮🇷",
     "محمدرضا عارف": "🇮🇷", "علی مطهری": "🇮🇷", "احمد توکلی": "🇮🇷",
     "مصطفی معین": "🇮🇷", "علی‌اکبر ناطق نوری": "🇮🇷",
     "کمال خرازی": "🇮🇷", "محسن مهرعلیزاده": "🇮🇷",
-    "محمدرضا باهنر": "🇮🇷", "علیرضا زاکانی": "🇮٬",
+    "محمدرضا باهنر": "🇮🇷", "علیرضا زاکانی": "🇮🇷",
     "پرویز فتاح": "🇮🇷", "محمدرضا تاجیک": "🇮🇷", "علی ربیعی": "🇮🇷",
     "محمدرضا ظفرقندی": "🇮🇷", "بیژن نامدار زنگنه": "🇮🇷",
     "محمد اسلامی": "🇮🇷", "عباس آخوندی": "🇮🇷",
     "محمدجواد آذری جهرمی": "🇮🇷", "احمد وحیدی": "🇮🇷",
     "اسکندر مؤمنی": "🇮🇷", "علی عبدالعلی‌زاده": "🇮🇷",
+    # آمریکا (پرچم آمریکا)
     "ترامپ": "🇺🇸", "بایدن": "🇺🇸", "پنس": "🇺🇸", "هریس": "🇺🇸",
     "بوش": "🇺🇸", "اوباما": "🇺🇸", "کلینتون": "🇺🇸",
     "مایک پمپئو": "🇺🇸", "جان کری": "🇺🇸", "بلینکن": "🇺🇸",
+    # اسرائیل (موش)
     "نتانیاهو": "🐀", "صهیونیست": "🐀", "موساد": "🐀",
 }
 
@@ -55,12 +58,12 @@ PLACES = {
     "بقاع": "🇱🇧", "نبطیه": "🇱🇧", "بعلبک": "🇱🇧",
     "دمشق": "🇸🇾", "حلب": "🇸🇾", "حمص": "🇸🇾", "لاذقیه": "🇸🇾",
     "طرطوس": "🇸🇾", "ادلب": "🇸🇾", "دیرالزور": "🇸🇾", "قنیطره": "🇸🇾",
-    "غزه": "🇵🇸", "رفح": "🇵٬", "خان یونس": "🇵🇸",
+    "غزه": "🇵🇸", "رفح": "🇵🇸", "خان یونس": "🇵🇸",
     "جبالیا": "🇵🇸", "بیت لاهیا": "🇵🇸", "نوار غزه": "🇵🇸",
     "جنین": "🇵🇸", "طولکرم": "🇵🇸", "نابلس": "🇵🇸",
     "رام‌الله": "🇵🇸", "الخلیل": "🇵🇸", "بیت لحم": "🇵🇸",
     "اریحا": "🇵🇸", "کرانه باختری": "🇵🇸", "مسجدالاقصی": "🇵🇸",
-    "الاقصی": "🇵٬", "بیت حانون": "🇵🇸", "دیرالبلح": "🇵🇸",
+    "الاقصی": "🇵🇸", "بیت حانون": "🇵🇸", "دیرالبلح": "🇵🇸",
     "بیت جالا": "🇵🇸", "بیت ساحور": "🇵🇸", "قلقیلیه": "🇵🇸",
     "تل‌آویو": "🇮🇱", "قدس": "🇮🇱", "حیفا": "🇮🇱",
     "اشدود": "🇮🇱", "بئرالسبع": "🇮🇱", "الجلیل": "🇮🇱",
@@ -68,7 +71,7 @@ PLACES = {
     "اشکلون": "🇮🇱", "نتانیا": "🇮🇱", "عکا": "🇮🇱",
     "صفد": "🇮🇱", "نهاریا": "🇮🇱", "هرتزلیا": "🇮🇱",
     "بات یام": "🇮🇱", "حولون": "🇮🇱", "ریشون لتسیون": "🇮🇱",
-    "بنی براک": "🇮٬", "رمات گان": "🇮🇱", "کریات شمونه": "🇮🇱",
+    "بنی براک": "🇮🇱", "رمات گان": "🇮🇱", "کریات شمونه": "🇮🇱",
     "مرز لبنان": "🇮🇱", "جولان": "🇮🇱", "بلندی‌های جولان": "🇮🇱",
     "صحرای نقب": "🇮🇱", "نقب": "🇮🇱",
     "صنعا": "🇾🇪", "الحدیده": "🇾🇪", "صعده": "🇾🇪", "عدن": "🇾🇪",
@@ -90,16 +93,16 @@ PLACES = {
     "الخرج": "🇸🇦", "الطائف": "🇸🇦",
     "دبی": "🇦🇪", "ابوظبی": "🇦🇪", "فجیره": "🇦🇪",
     "شارجه": "🇦🇪", "رأس الخیمه": "🇦🇪", "خورفکان": "🇦🇪",
-    "العین": "🇦🇪", "ام القوین": "🇦٬", "عجمان": "🇦🇪",
+    "العین": "🇦🇪", "ام القوین": "🇦🇪", "عجمان": "🇦🇪",
     "جبل علی": "🇦🇪", "مصفح": "🇦🇪", "الرویس": "🇦🇪",
     "داس": "🇦🇪", "حبشان": "🇦🇪", "الظفره": "🇦🇪",
     "دوحه": "🇶🇦", "العدید": "🇶🇦", "راس لفان": "🇶🇦",
     "الخور": "🇶🇦", "لوسیل": "🇶🇦", "مسیعید": "🇶🇦", "حمد": "🇶🇦",
-    "کویت": "🇰🇼", "الاحمدی": "🇰🇼", "المطلاع": "🇰٬",
+    "کویت": "🇰🇼", "الاحمدی": "🇰🇼", "المطلاع": "🇰🇼",
     "الجهراء": "🇰🇼", "الفحیحیل": "🇰🇼", "الشعیبه": "🇰🇼", "صبحان": "🇰🇼",
     "منامه": "🇧🇭", "المحرق": "🇧🇭", "ستره": "🇧🇭", "الرفاع": "🇧🇭",
     "مسقط": "🇴🇲", "صلاله": "🇴🇲", "دقم": "🇴🇲", "صحار": "🇴🇲",
-    "خصب": "🇴🇲", "مسندم": "🇴🇲", "نزوی": "🇴٬", "برکاء": "🇴🇲",
+    "خصب": "🇴🇲", "مسندم": "🇴🇲", "نزوی": "🇴🇲", "برکاء": "🇴🇲",
     "صور عمان": "🇴🇲", "عبری": "🇴🇲",
     "آنکارا": "🇹🇷", "استانبول": "🇹🇷", "وان": "🇹🇷",
     "دیاربکر": "🇹🇷", "اینجرلیک": "🇹🇷",
@@ -112,7 +115,7 @@ PLACES = {
     "داغستان": "🇷🇺", "کریمه": "🇷🇺",
     "کی‌یف": "🇺🇦", "اودسا": "🇺🇦",
     "واشنگتن": "🇺🇸", "نیویورک": "🇺🇸", "پنتاگون": "🇺🇸",
-    "کاخ سفید": "🇺🇸", "فلوریدا": "🇺٬", "سن دیگو": "🇺🇸",
+    "کاخ سفید": "🇺🇸", "فلوریدا": "🇺🇸", "سن دیگو": "🇺🇸",
     "پکن": "🇨🇳", "شانگهای": "🇨🇳", "تایوان": "🇹🇼", "تایپه": "🇹🇼",
     "پیونگ یانگ": "🇰🇵", "سئول": "🇰🇷",
     "لندن": "🇬🇧", "پاریس": "🇫🇷", "برلین": "🇩🇪", "بروکسل": "🇧🇪",
@@ -219,6 +222,7 @@ BLOCKED_WORDS = [
 
 TEXTS_TO_REMOVE = [
     "@akharinkhabar", "@Akharinkhabar", "@AKHARINKHABAR",
+    "akharinkhabar", "Akharinkhabar", "AKHARINKHABAR",
     "| akharinkhabar.ir", "akharinkhabar.ir",
     "t.me/akharinkhabar", "https://t.me/akharinkhabar",
     "@KhabarFori", "@khabarfori", "@KHABARFORI",
@@ -227,65 +231,22 @@ TEXTS_TO_REMOVE = [
     "@Projectmeshkat", "t.me/Projectmeshkat",
     "https://zil.ink/ProjectMeshkat",
     "آخرین خبر در روبیکا", "آخرین خبر در ایتا", "آخرین خبر در بله",
-    "آخرین خبر در سروش", "آخرین خبر در گپ",
-    "سایت آخرین خبر", "اپلیکیشن آخرین خبر",
-]
-
-# عبارات تبلیغاتی که کل خطشان حذف می‌شود
-PROMO_LINE_PHRASES = [
-    "آخرین خبر هرمزگان را در پیام رسان‌های ایرانی دنبال کنید",
-    "آخرین خبر را در پیام رسان‌های ایرانی دنبال کنید",
-    "ما را در شبکه‌های اجتماعی دنبال کنید",
-    "کانال‌های آخرین‌خبر",
 ]
 
 recent_texts = []
 MAX_HISTORY = 200
 
+# ===== توابع کمکی =====
 def normalize(text):
     if not text: return ""
     text = text.replace("\u200c", " ")
     text = text.replace("ي", "ی").replace("ك", "ک")
     return re.sub(r"\s+", " ", text).strip()
 
-def is_spam_line(line):
-    """تشخیص یک خط تبلیغاتی بر اساس الگوها"""
-    # لینک‌های پیام‌رسان‌های داخلی
-    if re.search(r'https?://(?:rubika\.ir|ble\.ir|eitaa\.com|splus\.ir|gap\.im)', line, re.IGNORECASE):
-        return True
-    # لینک‌های خود آخرین‌خبر
-    if re.search(r'https?://t\.me/akharinkhabar', line, re.IGNORECASE):
-        return True
-    # هر خطی که حاوی akharinkhabar.ir باشد (حتی بدون http)
-    if re.search(r'akharinkhabar\.ir', line, re.IGNORECASE):
-        return True
-    # ترکیب لینک + کلمات ترغیبی
-    if re.search(r'https?://', line) and re.search(r'(کلیک کنید|همین حالا|بازدید کنید|ثبت نام|همین الان|برای اطلاعات بیشتر|جهت مشاهده|اطلاعات بیشتر|اینجا کلیک کنید|برای خرید|تخفیف ویژه|همین الان عضو شوید|همین الان دانلود کنید)', line, re.IGNORECASE):
-        return True
-    # کلمات مالی + لینک
-    if re.search(r'(کارت هدیه|تسهیلات|وام|سود علی‌الحساب|سپرده|اعتبار|طرح ویژه|غیرحضوری|ارسال به سراسر)', line) and re.search(r'https?://', line):
-        return True
-    # عبارات معروف تبلیغاتی
-    if any(phrase in line for phrase in PROMO_LINE_PHRASES):
-        return True
-    return False
-
-def remove_promotional_lines(text):
-    lines = text.split('\n')
-    kept = []
-    for line in lines:
-        if not is_spam_line(line):
-            kept.append(line)
-    return '\n'.join(kept)
-
 def clean_text(text):
     if not text: return ""
-    # اول خطوط تبلیغاتی را حذف کن
-    text = remove_promotional_lines(text)
-    # سپس لینک‌های باقیمانده و دامنه‌های .ir را حذف کن
     text = re.sub(r"https?://\S+", "", text)
     text = re.sub(r"\S*\.ir\S*", "", text)
-    # امضاها و کلمات مشخص را حذف کن
     for item in TEXTS_TO_REMOVE:
         text = text.replace(item, "")
     text = re.sub(r"@[^\s]+", "", text)
@@ -294,19 +255,10 @@ def clean_text(text):
     return text.strip()
 
 def is_rubbish(text):
-    return not text or len(text.strip()) < 6
+    return not text or len(text.strip()) < 10
 
 def contains_blocked(text):
     return any(bad in normalize(text).lower() for bad in BLOCKED_WORDS)
-
-def has_financial_scam(text):
-    if re.search(r'\b\d{4}\s?\d{4}\s?\d{4}\s?\d{4}\b', text):
-        return True
-    if re.search(r'\bIR\d{2}\s?\d{4}\s?\d{4}\s?\d{4}\s?\d{4}\s?\d{4}\b', text, re.IGNORECASE):
-        return True
-    if re.search(r'(pay|zarinpal|idpay|payment|شارژ|کیف پول)', text, re.IGNORECASE):
-        return True
-    return False
 
 def is_similar(new_text, threshold=0.8):
     for old_text in recent_texts:
@@ -320,6 +272,7 @@ def add_to_history(text):
         recent_texts.pop(0)
 
 def tokenize(text):
+    """ شکستن متن به کلمات (حذف علائم) """
     return re.findall(r'\w+', normalize(text))
 
 def generate_header(text):
@@ -330,36 +283,43 @@ def generate_header(text):
     countries = []
     topics = []
 
+    # جستجوی اشخاص (پرچم کشور)
     for token in tokens:
         if token in PERSONS:
             emoji = PERSONS[token]
             if emoji not in countries:
                 countries.append(emoji)
 
+    # جستجوی اماکن (پرچم)
     for token in tokens:
         if token in PLACES:
             emoji = PLACES[token]
             if emoji not in countries:
                 countries.append(emoji)
 
+    # جستجوی موضوعات نظامی (با رفع ابهام کشتی)
     for token in tokens:
         if token in MILITARY:
             if token == "کشتی" and has_sports:
-                continue
+                continue  # اگر زمینه ورزشی است، کشتی نظامی نادیده گرفته می‌شود
             emoji = MILITARY[token]
             if emoji not in topics:
                 topics.append(emoji)
 
+    # جستجوی موضوعات ورزشی / عمومی
     for token in tokens:
         if token in TOPICS:
             emoji = TOPICS[token]
             if emoji not in topics:
                 topics.append(emoji)
+        # واژگان اضافی با دو ایموجی (اولی جدا، دومی جدا)
         if token in EXTRA_TOPICS:
-            for e in list(EXTRA_TOPICS[token]):
+            emojis = list(EXTRA_TOPICS[token])  # رشته را به لیست کاراکترهای اموجی تبدیل می‌کند
+            for e in emojis:
                 if e not in topics:
                     topics.append(e)
 
+    # حذف تکراری‌ها با حفظ ترتیب
     uniq_countries = []
     for c in countries:
         if c not in uniq_countries:
@@ -369,21 +329,27 @@ def generate_header(text):
         if t not in uniq_topics:
             uniq_topics.append(t)
 
+    # ساخت header سه‌تایی
     final = []
+    # اولویت: کشور اول
     if uniq_countries:
         final.append(uniq_countries[0])
+    # سپس موضوع اول
     if uniq_topics:
         final.append(uniq_topics[0])
+    # سپس کشور دوم (اگر هست) وگرنه موضوع دوم وگرنه پیش‌فرض
     if len(uniq_countries) > 1:
         final.append(uniq_countries[1])
     elif len(uniq_topics) > 1:
         final.append(uniq_topics[1])
     else:
+        # پر کردن با ایموجی‌های پیش‌فرض غیرتکراری
         for d in DEFAULT_EMOJIS:
             if d not in final:
                 final.append(d)
                 break
 
+    # پر کردن تا سه ایموجی
     while len(final) < 3:
         for d in DEFAULT_EMOJIS:
             if d not in final:
@@ -399,6 +365,7 @@ def format_news(cleaned_text):
     rest = lines[1].strip() if len(lines) > 1 else ""
     return f"{title}\n{rest}" if rest else title
 
+# ===== اتصال تلگرام =====
 client = TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH)
 dest_entity = None
 
@@ -417,19 +384,15 @@ async def handler(event):
         text = msg.message or ""
         if not text.strip(): return
 
-        # اگر کلاهبرداری مالی بود، بلاک کن
-        if contains_blocked(text) or has_financial_scam(text):
-            print("⛔ تبلیغ / کلاهبرداری")
-            return
+        if contains_blocked(text):
+            print("⛔ تبلیغ"); return
 
         cleaned = clean_text(text)
         if is_rubbish(cleaned):
-            print("⛔ بی‌ارزش")
-            return
+            print("⛔ بی‌ارزش"); return
 
         if is_similar(cleaned):
-            print("⛔ تکراری")
-            return
+            print("⛔ تکراری"); return
 
         add_to_history(cleaned)
 
@@ -443,9 +406,18 @@ async def handler(event):
                 if dest_entity is None:
                     await resolve_dest()
                 if msg.media:
-                    await client.send_message(dest_entity or DEST_CHANNEL, final_text, file=msg.media, parse_mode='md')
+                    await client.send_message(
+                        dest_entity or DEST_CHANNEL,
+                        final_text,
+                        file=msg.media,
+                        parse_mode='md'
+                    )
                 else:
-                    await client.send_message(dest_entity or DEST_CHANNEL, final_text, parse_mode='md')
+                    await client.send_message(
+                        dest_entity or DEST_CHANNEL,
+                        final_text,
+                        parse_mode='md'
+                    )
                 print("✅ ارسال شد")
                 break
             except FloodWaitError as e:
@@ -470,11 +442,10 @@ async def handler(event):
         print("❌ خطا:", e)
 
 def memory_cleaner():
-    global recent_texts
     while True:
         time.sleep(6 * 3600)
         if len(recent_texts) > 200:
-            recent_texts = recent_texts[-200:]
+            del recent_texts[:-200]
             print("🧹 حافظه پاکسازی شد.")
 
 app = Flask(__name__)
@@ -490,7 +461,7 @@ if __name__ == "__main__":
     else:
         threading.Thread(target=memory_cleaner, daemon=True).start()
         threading.Thread(target=run_web, daemon=True).start()
-        print("🚀 ربات پایدار و ضد اسپم احسان روشن شد.")
+        print("🚀 ربات فوق‌حرفه‌ای احسان روشن شد (تشخیص کلمات با مرز + ابهام‌زدایی)")
         with client:
             client.loop.run_until_complete(resolve_dest())
             client.run_until_disconnected()
