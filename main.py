@@ -10,7 +10,7 @@ API_HASH = "5a19b28b0417beeb45b23cbf77586257"
 SESSION_STRING = os.environ.get("SESSION_STRING", "")
 SOURCE_CHANNELS = ["akharinkhabar", "Projectmeshkat"]
 DEST_CHANNEL = "@yarakhabar"
-MY_SIGNATURE = "\n\n@YARAKHABAR📢\n🎯👉هر لحظه یک خبر تازه👈🎯"
+MY_SIGNATURE = "\n\n@YARAKHABAR📢\n🎯👈هر لحظه یک خبر تازه👉🎯"
 
 # ===== لیست‌های واژگان (کامل) =====
 PERSONS = {
